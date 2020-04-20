@@ -38,6 +38,20 @@ fun Application.petsModule() {
             }
         }
 
+        get("/owners/{id}/pets"){
+            val id = try {
+                call.parameters["id"]?.toInt() ?: throw IllegalStateException("Missing parameter: id")
+            } catch (e: Exception) {
+                call.respond(HttpStatusCode.BadRequest, "Invalid id: must be an integer value")
+                return@get
+            }
+            try {
+                call.respond(petsService.listPetsOfOwner(id))
+            } catch(e : NoSuchElementException){
+                call.respond(HttpStatusCode.NotFound)
+            }
+        }
+
         post("/owners/{id}/pets"){
             val id = try {
                 call.parameters["id"]?.toInt() ?: throw IllegalStateException("Missing parameter: id")

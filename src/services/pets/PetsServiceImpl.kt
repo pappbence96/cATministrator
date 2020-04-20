@@ -14,15 +14,22 @@ class PetsServiceImpl : PetsService {
     }
 
     override fun listPetsOfOwner(ownerId : Int): List<PetDto> {
-        return transaction { Pets.selectAll()
-            .andWhere { Pets.ownerId eq ownerId }
-            .map { it.toPetDto() }
+        return transaction {
+            // Throws when there is no such owner so we can get a 404 response
+            PetOwners.selectAll()
+                .andWhere { PetOwners.id eq ownerId }
+                .first()
+
+            Pets.selectAll()
+                .andWhere { Pets.ownerId eq ownerId }
+                .map { it.toPetDto() }
         }
     }
 
     override fun findPetById(id: Int): PetDto {
-        return transaction { Pets.selectAll()
-            .andWhere { Pets.ownerId eq id }
+        return transaction {
+            Pets.selectAll()
+            .andWhere { Pets.id eq id }
             .map { it.toPetDto() }
             .first()
         }
