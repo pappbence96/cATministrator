@@ -12,8 +12,6 @@ import io.ktor.response.respond
 import io.ktor.routing.get
 import io.ktor.routing.put
 import io.ktor.routing.routing
-import org.jetbrains.exposed.sql.*
-import org.jetbrains.exposed.sql.transactions.transaction
 import org.koin.ktor.ext.inject
 import java.lang.Exception
 
@@ -39,7 +37,7 @@ fun Application.ownersModule() {
             }
         }
 
-        put("/owners") {
+        post("/owners") {
             val dto = call.receive<PetOwnerDto>()
             val id = ownersService.create(dto)
             call.respond(PetOwnerCreatedDto(id))
