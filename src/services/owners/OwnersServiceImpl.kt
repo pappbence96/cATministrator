@@ -1,4 +1,4 @@
-package hu.pappbence.services
+package hu.pappbence.services.owners
 
 import hu.pappbence.dto.PetOwnerDto
 import hu.pappbence.model.PetOwners

@@ -1,8 +1,7 @@
 package hu.pappbence.modules
 
+import hu.pappbence.dto.PetCreatedDto
 import hu.pappbence.dto.PetDto
-import hu.pappbence.dto.PetOwnerCreatedDto
-import hu.pappbence.dto.PetOwnerDto
 import hu.pappbence.services.owners.OwnersService
 import hu.pappbence.services.pets.PetsService
 import io.ktor.application.Application
@@ -12,21 +11,20 @@ import io.ktor.request.receive
 import io.ktor.response.respond
 import io.ktor.routing.get
 import io.ktor.routing.post
-import io.ktor.routing.put
 import io.ktor.routing.routing
+import org.koin.ktor.ext.get
 import org.koin.ktor.ext.inject
 import java.lang.Exception
 
-fun Application.ownersModule() {
-    val ownersService: OwnersService by inject()
-    val petsStatusCode: PetsService by inject()
+fun Application.petsModule() {
+    val petsService: PetsService by inject()
 
     routing {
-        get("/owners") {
-            call.respond(ownersService.listAll())
+        get("/pets") {
+            call.respond(petsService.listPets())
         }
 
-        get("/owners/{id}") {
+        get("/pets/{id}"){
             val id = try {
                 call.parameters["id"]?.toInt() ?: throw IllegalStateException("Missing parameter: id")
             } catch (e: Exception) {
@@ -34,30 +32,23 @@ fun Application.ownersModule() {
                 return@get
             }
             try {
-                call.respond(ownersService.findById(id))
+                call.respond(petsService.findPetById(id))
             } catch(e : NoSuchElementException){
                 call.respond(HttpStatusCode.NotFound)
             }
         }
 
-        post("/owners") {
-            val dto = call.receive<PetOwnerDto>()
-            val id = ownersService.create(dto)
-            call.respond(PetOwnerCreatedDto(id))
-        }
-
-        put("/owners/{id}") {
+        post("/owners/{id}/pets"){
             val id = try {
                 call.parameters["id"]?.toInt() ?: throw IllegalStateException("Missing parameter: id")
             } catch (e: Exception) {
                 call.respond(HttpStatusCode.BadRequest, "Invalid id: must be an integer value")
-                return@put
+                return@post
             }
-            val dto = call.receive<PetOwnerDto>()
+            val dto = call.receive<PetDto>()
 
             try {
-                ownersService.update(id, dto)
-                call.respond(HttpStatusCode.NoContent)
+                call.respond(PetCreatedDto(petsService.createPetForUser(id, dto)))
             } catch (e : NoSuchElementException) {
                 call.respond(HttpStatusCode.NotFound)
             }

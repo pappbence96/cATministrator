@@ -1,5 +1,6 @@
 package hu.pappbence.model
 
+import org.jetbrains.exposed.dao.id.EntityID
 import org.jetbrains.exposed.dao.id.IntIdTable
 import org.jetbrains.exposed.sql.jodatime.datetime
 
@@ -8,5 +9,5 @@ object Pets : IntIdTable() {
     val age = integer("age")
     val species = varchar("species", 20)
     val added = datetime("added")
-    val owner = reference("owner", PetOwners).references(PetOwners.id)
+    val ownerId = reference("ownerId", PetOwners).references(PetOwners.id)
 }
