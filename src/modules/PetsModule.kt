@@ -11,6 +11,7 @@ import io.ktor.request.receive
 import io.ktor.response.respond
 import io.ktor.routing.get
 import io.ktor.routing.post
+import io.ktor.routing.put
 import io.ktor.routing.routing
 import org.koin.ktor.ext.get
 import org.koin.ktor.ext.inject
@@ -36,6 +37,24 @@ fun Application.petsModule() {
             } catch(e : NoSuchElementException){
                 call.respond(HttpStatusCode.NotFound)
             }
+        }
+
+        put("/pets/{id}"){
+            val id = try {
+                call.parameters["id"]?.toInt() ?: throw IllegalStateException("Missing parameter: id")
+            } catch (e: Exception) {
+                call.respond(HttpStatusCode.BadRequest, "Invalid id: must be an integer value")
+                return@put
+            }
+            val dto = call.receive<PetDto>()
+
+            call.respond(
+                if(petsService.updatePet(id, dto) == 1){
+                    HttpStatusCode.NoContent
+                } else {
+                    HttpStatusCode.NotFound
+                }
+            )
         }
 
         get("/owners/{id}/pets"){

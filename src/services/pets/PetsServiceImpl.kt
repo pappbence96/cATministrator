@@ -5,6 +5,7 @@ import hu.pappbence.model.PetOwners
 import hu.pappbence.model.Pets
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.joda.time.DateTime
 
 class PetsServiceImpl : PetsService {
     override fun listPets(): List<PetDto> {
@@ -46,12 +47,22 @@ class PetsServiceImpl : PetsService {
                 it[name] = dto.name
                 it[age] = dto.age
                 it[species] = dto.species
-                it[added] = dto.added
+                it[added] = DateTime.now()
                 it[Pets.ownerId] = ownerIdObj
             } get Pets.id
         }
 
         return petId.value
+    }
+
+    override fun updatePet(id: Int, dto: PetDto): Int {
+        return transaction {
+            Pets.update({ Pets.id eq id }) {
+                it[name] = dto.name
+                it[age] = dto.age
+                it[species] = dto.species
+            }
+        }
     }
 
     // Map from DB entity to DTO

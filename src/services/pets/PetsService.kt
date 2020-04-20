@@ -7,4 +7,5 @@ interface PetsService {
     fun listPetsOfOwner(ownerId: Int) : List<PetDto>
     fun findPetById(id: Int) : PetDto
     fun createPetForUser(ownerId: Int, dto: PetDto) : Int
+    fun updatePet(id: Int, dto: PetDto) : Int
 }
