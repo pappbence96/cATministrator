@@ -38,7 +38,7 @@ class OwnersServiceImpl : OwnersService {
 
     // Update an existing pet owner specified by their ID
     override fun update(id: Int, dto: PetOwnerDto) : Int {
-        transaction {
+        return transaction {
             PetOwners.update ({ PetOwners.id eq id }) {
                 it[name] = dto.name
                 it[phone] = dto.phone
