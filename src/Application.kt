@@ -2,6 +2,7 @@ package hu.pappbence
 
 import hu.pappbence.adapters.JsonJodaTimeAdapter
 import hu.pappbence.di.injectionModule
+import hu.pappbence.model.AppointmentTypes
 import hu.pappbence.model.PetOwners
 import hu.pappbence.model.Pets
 import io.ktor.application.*
@@ -47,7 +48,32 @@ fun Application.module(testing: Boolean = false) {
     TransactionManager.manager.defaultIsolationLevel = Connection.TRANSACTION_SERIALIZABLE
     transaction {
         addLogger(StdOutSqlLogger)
-        SchemaUtils.create(PetOwners, Pets)
+        SchemaUtils.create(PetOwners, Pets, AppointmentTypes)
+/*
+        AppointmentTypes.insert {
+            it[name] = "Bathing & drying"
+            it[fee] = 5000
+        }
+        AppointmentTypes.insert {
+            it[name] = "Grooming"
+            it[fee] = 6500
+        }
+        AppointmentTypes.insert {
+            it[name] = "Health checkup"
+            it[fee] = 3000
+        }
+        AppointmentTypes.insert {
+            it[name] = "Nail care"
+            it[fee] = 4800
+        }
+        AppointmentTypes.insert {
+            it[name] = "Special fur trimming"
+            it[fee] = 12000
+        }
+        AppointmentTypes.insert {
+            it[name] = "Ear care"
+            it[fee] = 5000
+        }*/
     }
 
     startKoin{

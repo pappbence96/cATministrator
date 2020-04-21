@@ -7,6 +7,7 @@ import hu.pappbence.services.owners.OwnersService
 import hu.pappbence.services.pets.PetsService
 import io.ktor.application.Application
 import io.ktor.application.call
+import io.ktor.html.respondHtml
 import io.ktor.http.HttpStatusCode
 import io.ktor.request.receive
 import io.ktor.response.respond
@@ -14,6 +15,7 @@ import io.ktor.routing.get
 import io.ktor.routing.post
 import io.ktor.routing.put
 import io.ktor.routing.routing
+import kotlinx.html.*
 import org.koin.ktor.ext.inject
 import java.lang.Exception
 
