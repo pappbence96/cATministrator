@@ -8,5 +8,5 @@ interface OwnersService {
     fun listAll() : List<PetOwnerDto>
     fun findById(id: Int): PetOwnerDto
     fun create(dto: PetOwnerDto): Int
-    fun update(id: Int, dto: PetOwnerDto)
+    fun update(id: Int, dto: PetOwnerDto) : Int
 }

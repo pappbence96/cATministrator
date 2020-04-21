@@ -55,12 +55,13 @@ fun Application.ownersModule() {
             }
             val dto = call.receive<PetOwnerDto>()
 
-            try {
-                ownersService.update(id, dto)
-                call.respond(HttpStatusCode.NoContent)
-            } catch (e : NoSuchElementException) {
-                call.respond(HttpStatusCode.NotFound)
-            }
+            call.respond(
+                if(ownersService.update(id, dto) == 1){
+                    HttpStatusCode.NoContent
+                } else {
+                    HttpStatusCode.NotFound
+                }
+            )
         }
     }
 }
