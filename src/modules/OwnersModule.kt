@@ -47,7 +47,6 @@ fun Application.ownersModule() {
             val id = ownersService.create(dto)
             call.respond(PetOwnerCreatedDto(id))
         }
-
         put("/owners/{id}") {
             val id = try {
                 call.parameters["id"]?.toInt() ?: throw IllegalStateException("Missing parameter: id")
