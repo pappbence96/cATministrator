@@ -5,8 +5,11 @@ import hu.pappbence.model.AppointmentTypes
 import hu.pappbence.model.PetAppointmentRegistrations
 import hu.pappbence.model.PetOwners
 import hu.pappbence.model.Pets
+import hu.pappbence.services.appointments.AppointmentsService
+import hu.pappbence.services.owners.OwnersService
 import io.ktor.application.Application
 import io.ktor.application.call
+import io.ktor.features.NotFoundException
 import io.ktor.http.HttpStatusCode
 import io.ktor.request.receive
 import io.ktor.response.respond
@@ -21,20 +24,32 @@ import java.lang.Exception
 
 fun Application.appointmentsModule() {
 
+    val appointmentsService: AppointmentsService by inject()
+
     routing {
         get("/appointments") {
-            call.respond(transaction {
-                AppointmentTypes.selectAll().map{ it.toAppointmentDto() }
-            })
+            call.respond(appointmentsService.listAppointments())
+        }
+
+        get("/appointments/{id}") {
+            val id = try {
+                call.parameters["id"]?.toInt() ?: throw IllegalStateException("Missing parameter: id")
+            } catch (e: Exception) {
+                call.respond(HttpStatusCode.BadRequest, "Invalid id: must be an integer value")
+                return@get
+            }
+            try {
+                call.respond(appointmentsService.findAppointmentById(id))
+            } catch(e: Exception) {
+                call.respond(HttpStatusCode.NotFound)
+            }
         }
 
         get("/appointments/registrations") {
-            call.respond(transaction {
-                PetAppointmentRegistrations.selectAll().map{ it.toAppointmentRegistrationDto() }
-            })
+            call.respond(appointmentsService.listRegistrations())
         }
 
-        post("/pets/{petId}/appointments/{appointmentId}"){
+        post("/pets/{petId}/registrations/{appointmentId}"){
             val petId = try {
                 call.parameters["petId"]?.toInt() ?: throw IllegalStateException("Missing parameter: petId")
             } catch (e: Exception) {
@@ -49,23 +64,11 @@ fun Application.appointmentsModule() {
             }
             val dto = call.receive<AppointmentRegistrationDto>()
 
-            call.respond(RegistrationResultDto(transaction {
-                val petIdObj = Pets.selectAll()
-                    .andWhere { Pets.id eq petId }
-                    .map{ it[Pets.id]}
-                    .first()
-
-                val appointmentIdObj = AppointmentTypes.selectAll()
-                    .andWhere { AppointmentTypes.id eq appointmentId }
-                    .map{ it[AppointmentTypes.id]}
-                    .first()
-
-                PetAppointmentRegistrations.insert {
-                    it[PetAppointmentRegistrations.petId] = petIdObj
-                    it[PetAppointmentRegistrations.appointmentId] = appointmentIdObj
-                    it[PetAppointmentRegistrations.date] = dto.date
-                } get PetAppointmentRegistrations.id
-            }.value))
+            try {
+                call.respond(appointmentsService.registerPetForAppointment(petId, appointmentId, dto.date))
+            } catch (e: NotFoundException) {
+                call.respond(HttpStatusCode.NotFound)
+            }
         }
 
         get("/owners/{ownerId}/registrations"){
@@ -76,20 +79,11 @@ fun Application.appointmentsModule() {
                 return@get
             }
 
-            call.respond(transaction {
-                val petIdsOfOwner = Pets.selectAll()
-                    .andWhere { Pets.ownerId eq ownerId }
-                    .map { it[Pets.id].value }
-
-                PetAppointmentRegistrations.selectAll()
-                    .andWhere { PetAppointmentRegistrations.petId inList petIdsOfOwner }
-                    .map { RegistrationDto(
-                        it[PetAppointmentRegistrations.id].value,
-                        it[PetAppointmentRegistrations.petId].value,
-                        it[PetAppointmentRegistrations.appointmentId].value,
-                        it[PetAppointmentRegistrations.date]
-                    ) }
-            })
+            try {
+                call.respond(appointmentsService.listRegistrationsOfOwner(ownerId))
+            } catch (e: NotFoundException) {
+                call.respond(HttpStatusCode.NotFound)
+            }
         }
 
         get("/pets/{petId}/registrations"){
@@ -100,33 +94,11 @@ fun Application.appointmentsModule() {
                 return@get
             }
 
-            call.respond(transaction {
-                PetAppointmentRegistrations.selectAll()
-                    .andWhere { PetAppointmentRegistrations.petId eq petId }
-                    .map { RegistrationDto(
-                        it[PetAppointmentRegistrations.id].value,
-                        it[PetAppointmentRegistrations.petId].value,
-                        it[PetAppointmentRegistrations.appointmentId].value,
-                        it[PetAppointmentRegistrations.date]
-                    ) }
-            })
+            try {
+                call.respond(appointmentsService.listRegistrationsOfPet(petId))
+            } catch (e: NotFoundException) {
+                call.respond(HttpStatusCode.NotFound)
+            }
         }
     }
-}
-
-fun ResultRow.toAppointmentDto(): AppointmentDto {
-    return AppointmentDto(
-        this[AppointmentTypes.id].value,
-        this[AppointmentTypes.name],
-        this[AppointmentTypes.fee]
-    )
-}
-
-fun ResultRow.toAppointmentRegistrationDto(): RegistrationDto {
-    return RegistrationDto(
-        this[PetAppointmentRegistrations.id].value,
-        this[PetAppointmentRegistrations.petId].value,
-        this[PetAppointmentRegistrations.appointmentId].value,
-        this[PetAppointmentRegistrations.date]
-    )
 }
