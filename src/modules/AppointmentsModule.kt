@@ -68,7 +68,7 @@ fun Application.appointmentsModule() {
             }.value))
         }
 
-        get("/owners/{ownerId}/appointments"){
+        get("/owners/{ownerId}/registrations"){
             val ownerId = try {
                 call.parameters["ownerId"]?.toInt() ?: throw IllegalStateException("Missing parameter: ownerId")
             } catch (e: Exception) {
@@ -92,7 +92,7 @@ fun Application.appointmentsModule() {
             })
         }
 
-        get("/pets/{petId}/appointments"){
+        get("/pets/{petId}/registrations"){
             val petId = try {
                 call.parameters["petId"]?.toInt() ?: throw IllegalStateException("Missing parameter: petId")
             } catch (e: Exception) {
