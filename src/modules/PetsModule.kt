@@ -1,8 +1,7 @@
 package hu.pappbence.modules
 
-import hu.pappbence.dto.PetCreatedDto
 import hu.pappbence.dto.PetDto
-import hu.pappbence.services.owners.OwnersService
+import hu.pappbence.dto.ResourceCreatedDto
 import hu.pappbence.services.pets.PetsService
 import io.ktor.application.Application
 import io.ktor.application.call
@@ -13,7 +12,6 @@ import io.ktor.routing.get
 import io.ktor.routing.post
 import io.ktor.routing.put
 import io.ktor.routing.routing
-import org.koin.ktor.ext.get
 import org.koin.ktor.ext.inject
 import java.lang.Exception
 
@@ -72,7 +70,7 @@ fun Application.petsModule() {
             }
             val dto = call.receive<PetDto>()
 
-            call.respond(PetCreatedDto(petsService.createPetForUser(id, dto)))
+            call.respond(ResourceCreatedDto(petsService.createPetForUser(id, dto)))
         }
     }
 }

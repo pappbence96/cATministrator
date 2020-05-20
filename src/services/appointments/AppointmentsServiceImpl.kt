@@ -1,9 +1,6 @@
 package hu.pappbence.services.appointments
 
-import hu.pappbence.dto.AppointmentDto
-import hu.pappbence.dto.PetDto
-import hu.pappbence.dto.RegistrationDto
-import hu.pappbence.dto.RegistrationResultDto
+import hu.pappbence.dto.*
 import hu.pappbence.model.AppointmentTypes
 import hu.pappbence.model.PetAppointmentRegistrations
 import hu.pappbence.model.PetOwners
@@ -42,7 +39,7 @@ class AppointmentsServiceImpl : AppointmentsService {
         }
     }
 
-    override fun registerPetForAppointment(petId: Int, appointmentId: Int, date: DateTime): RegistrationResultDto {
+    override fun registerPetForAppointment(petId: Int, appointmentId: Int, date: DateTime): ResourceCreatedDto {
         val registrationId = transaction {
             val petIdObj = Pets.selectAll()
                 .andWhere { Pets.id eq petId }
@@ -61,7 +58,7 @@ class AppointmentsServiceImpl : AppointmentsService {
             } get PetAppointmentRegistrations.id
         }.value
 
-        return RegistrationResultDto(registrationId)
+        return ResourceCreatedDto(registrationId)
     }
 
     override fun listRegistrationsOfPet(petId: Int): List<RegistrationDto> {
