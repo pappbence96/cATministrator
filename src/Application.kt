@@ -17,6 +17,8 @@ import io.ktor.client.*
 import io.ktor.client.engine.apache.*
 import io.ktor.client.features.logging.*
 import io.ktor.features.ContentNegotiation
+import io.ktor.features.NotFoundException
+import io.ktor.features.StatusPages
 import io.ktor.gson.gson
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.TransactionManager
@@ -41,6 +43,11 @@ fun Application.module(testing: Boolean = false) {
                 serializeNulls()
                 setDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'")
                 registerTypeAdapter(DateTime::class.java, JsonJodaTimeAdapter())
+            }
+        }
+        install(StatusPages){
+            exception<NotFoundException> { cause ->
+                call.respond(HttpStatusCode.NotFound, cause.message ?: "")
             }
         }
     }

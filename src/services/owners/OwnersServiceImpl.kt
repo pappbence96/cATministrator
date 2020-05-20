@@ -2,6 +2,7 @@ package hu.pappbence.services.owners
 
 import hu.pappbence.dto.PetOwnerDto
 import hu.pappbence.model.PetOwners
+import io.ktor.features.NotFoundException
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 
@@ -20,7 +21,7 @@ class OwnersServiceImpl : OwnersService {
         return transaction { PetOwners.selectAll()
                 .andWhere { PetOwners.id eq id }
                 .map { it.toPetOwnerDto() }
-                .first()
+                .firstOrNull() ?: throw NotFoundException("No owner found with id: $id")
         }
     }
 

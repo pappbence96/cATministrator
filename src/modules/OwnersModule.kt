@@ -21,7 +21,6 @@ import java.lang.Exception
 
 fun Application.ownersModule() {
     val ownersService: OwnersService by inject()
-    val petsStatusCode: PetsService by inject()
 
     routing {
         get("/owners") {
@@ -35,11 +34,8 @@ fun Application.ownersModule() {
                 call.respond(HttpStatusCode.BadRequest, "Invalid id: must be an integer value")
                 return@get
             }
-            try {
-                call.respond(ownersService.findById(id))
-            } catch(e : NoSuchElementException){
-                call.respond(HttpStatusCode.NotFound)
-            }
+
+            call.respond(ownersService.findById(id))
         }
 
         post("/owners") {
@@ -47,6 +43,7 @@ fun Application.ownersModule() {
             val id = ownersService.create(dto)
             call.respond(PetOwnerCreatedDto(id))
         }
+
         put("/owners/{id}") {
             val id = try {
                 call.parameters["id"]?.toInt() ?: throw IllegalStateException("Missing parameter: id")
@@ -56,13 +53,8 @@ fun Application.ownersModule() {
             }
             val dto = call.receive<PetOwnerDto>()
 
-            call.respond(
-                if(ownersService.update(id, dto) == 1){
-                    HttpStatusCode.NoContent
-                } else {
-                    HttpStatusCode.NotFound
-                }
-            )
+            ownersService.update(id, dto)
+            call.respond(HttpStatusCode.NoContent)
         }
     }
 }

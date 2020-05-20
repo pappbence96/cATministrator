@@ -48,13 +48,8 @@ fun Application.petsModule() {
             }
             val dto = call.receive<PetDto>()
 
-            call.respond(
-                if(petsService.updatePet(id, dto) == 1){
-                    HttpStatusCode.NoContent
-                } else {
-                    HttpStatusCode.NotFound
-                }
-            )
+            petsService.updatePet(id, dto)
+            call.respond(HttpStatusCode.NoContent)
         }
 
         get("/owners/{id}/pets"){
@@ -64,11 +59,8 @@ fun Application.petsModule() {
                 call.respond(HttpStatusCode.BadRequest, "Invalid id: must be an integer value")
                 return@get
             }
-            try {
-                call.respond(petsService.listPetsOfOwner(id))
-            } catch(e : NoSuchElementException){
-                call.respond(HttpStatusCode.NotFound)
-            }
+
+            call.respond(petsService.listPetsOfOwner(id))
         }
 
         post("/owners/{id}/pets"){
@@ -80,11 +72,7 @@ fun Application.petsModule() {
             }
             val dto = call.receive<PetDto>()
 
-            try {
-                call.respond(PetCreatedDto(petsService.createPetForUser(id, dto)))
-            } catch (e : NoSuchElementException) {
-                call.respond(HttpStatusCode.NotFound)
-            }
+            call.respond(PetCreatedDto(petsService.createPetForUser(id, dto)))
         }
     }
 }

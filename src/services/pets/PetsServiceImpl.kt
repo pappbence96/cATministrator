@@ -3,6 +3,7 @@ package hu.pappbence.services.pets
 import hu.pappbence.dto.PetDto
 import hu.pappbence.model.PetOwners
 import hu.pappbence.model.Pets
+import io.ktor.features.NotFoundException
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.joda.time.DateTime
@@ -19,7 +20,7 @@ class PetsServiceImpl : PetsService {
             // Throws when there is no such owner so we can get a 404 response
             PetOwners.selectAll()
                 .andWhere { PetOwners.id eq ownerId }
-                .first()
+                .firstOrNull() ?: throw NotFoundException("No owner found with id: $ownerId")
 
             Pets.selectAll()
                 .andWhere { Pets.ownerId eq ownerId }
@@ -32,7 +33,7 @@ class PetsServiceImpl : PetsService {
             Pets.selectAll()
             .andWhere { Pets.id eq id }
             .map { it.toPetDto() }
-            .first()
+            .firstOrNull() ?: throw NotFoundException("No pet found with id: $id")
         }
     }
 
@@ -41,7 +42,7 @@ class PetsServiceImpl : PetsService {
             val ownerIdObj = PetOwners.selectAll()
                 .andWhere { PetOwners.id eq ownerId }
                 .map{ it[PetOwners.id]}
-                .first()
+                .firstOrNull() ?: throw NotFoundException("No owner found with id: $ownerId")
 
             Pets.insert {
                 it[name] = dto.name

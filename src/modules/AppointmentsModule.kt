@@ -64,11 +64,7 @@ fun Application.appointmentsModule() {
             }
             val dto = call.receive<AppointmentRegistrationDto>()
 
-            try {
-                call.respond(appointmentsService.registerPetForAppointment(petId, appointmentId, dto.date))
-            } catch (e: NotFoundException) {
-                call.respond(HttpStatusCode.NotFound)
-            }
+            call.respond(appointmentsService.registerPetForAppointment(petId, appointmentId, dto.date))
         }
 
         get("/owners/{ownerId}/registrations"){
@@ -79,11 +75,7 @@ fun Application.appointmentsModule() {
                 return@get
             }
 
-            try {
-                call.respond(appointmentsService.listRegistrationsOfOwner(ownerId))
-            } catch (e: NotFoundException) {
-                call.respond(HttpStatusCode.NotFound)
-            }
+            call.respond(appointmentsService.listRegistrationsOfOwner(ownerId))
         }
 
         get("/pets/{petId}/registrations"){
@@ -94,11 +86,7 @@ fun Application.appointmentsModule() {
                 return@get
             }
 
-            try {
-                call.respond(appointmentsService.listRegistrationsOfPet(petId))
-            } catch (e: NotFoundException) {
-                call.respond(HttpStatusCode.NotFound)
-            }
+            call.respond(appointmentsService.listRegistrationsOfPet(petId))
         }
     }
 }

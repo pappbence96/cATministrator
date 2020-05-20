@@ -8,7 +8,6 @@ import hu.pappbence.model.AppointmentTypes
 import hu.pappbence.model.PetAppointmentRegistrations
 import hu.pappbence.model.PetOwners
 import hu.pappbence.model.Pets
-import hu.pappbence.modules.toAppointmentRegistrationDto
 import io.ktor.features.NotFoundException
 import org.jetbrains.exposed.sql.ResultRow
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
@@ -31,8 +30,8 @@ class AppointmentsServiceImpl : AppointmentsService {
         return transaction {
             AppointmentTypes.selectAll()
                 .andWhere { AppointmentTypes.id eq id }
-                .first()
-                .toAppointmentDto()
+                .firstOrNull()
+                ?.toAppointmentDto() ?: throw NotFoundException("No appointment type found with id: $id")
         }
     }
 
@@ -48,12 +47,12 @@ class AppointmentsServiceImpl : AppointmentsService {
             val petIdObj = Pets.selectAll()
                 .andWhere { Pets.id eq petId }
                 .map{ it[Pets.id]}
-                .firstOrNull() ?: throw NotFoundException("")
+                .firstOrNull() ?: throw NotFoundException("No pet found with id: $petId")
 
             val appointmentIdObj = AppointmentTypes.selectAll()
                 .andWhere { AppointmentTypes.id eq appointmentId }
                 .map{ it[AppointmentTypes.id]}
-                .firstOrNull() ?: throw NotFoundException("")
+                .firstOrNull() ?: throw NotFoundException("No appointment type found with id: $appointmentId")
 
             PetAppointmentRegistrations.insert {
                 it[PetAppointmentRegistrations.petId] = petIdObj
@@ -70,7 +69,7 @@ class AppointmentsServiceImpl : AppointmentsService {
             Pets.selectAll()
                 .andWhere { Pets.id eq petId }
                 .map{ it[Pets.id]}
-                .firstOrNull() ?: throw NotFoundException("")
+                .firstOrNull() ?: throw NotFoundException("No pet found with id: $petId")
 
             PetAppointmentRegistrations.selectAll()
                 .andWhere { PetAppointmentRegistrations.petId eq petId }
@@ -83,7 +82,7 @@ class AppointmentsServiceImpl : AppointmentsService {
             PetOwners.selectAll()
                 .andWhere { Pets.id eq ownerId }
                 .map{ it[Pets.id]}
-                .firstOrNull() ?: throw NotFoundException("")
+                .firstOrNull() ?: throw NotFoundException("No owner found with id: $ownerId")
 
             val petIdsOfOwner = Pets.selectAll()
                 .andWhere { Pets.ownerId eq ownerId }
