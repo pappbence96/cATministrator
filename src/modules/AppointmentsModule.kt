@@ -13,11 +13,8 @@ import io.ktor.response.respond
 import io.ktor.routing.get
 import io.ktor.routing.post
 import io.ktor.routing.routing
-import org.jetbrains.exposed.sql.ResultRow
+import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.andWhere
-import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.selectAll
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.koin.ktor.ext.inject
 import java.lang.Exception
@@ -71,12 +68,48 @@ fun Application.appointmentsModule() {
             }.value))
         }
 
-        get("/owners/{id}/appointments"){
+        get("/owners/{ownerId}/appointments"){
+            val ownerId = try {
+                call.parameters["ownerId"]?.toInt() ?: throw IllegalStateException("Missing parameter: ownerId")
+            } catch (e: Exception) {
+                call.respond(HttpStatusCode.BadRequest, "Invalid ownerId: must be an integer value")
+                return@get
+            }
 
+            call.respond(transaction {
+                val petIdsOfOwner = Pets.selectAll()
+                    .andWhere { Pets.ownerId eq ownerId }
+                    .map { it[Pets.id].value }
+
+                PetAppointmentRegistrations.selectAll()
+                    .andWhere { PetAppointmentRegistrations.petId inList petIdsOfOwner }
+                    .map { RegistrationDto(
+                        it[PetAppointmentRegistrations.id].value,
+                        it[PetAppointmentRegistrations.petId].value,
+                        it[PetAppointmentRegistrations.appointmentId].value,
+                        it[PetAppointmentRegistrations.date]
+                    ) }
+            })
         }
 
-        get("/pets/{id}/appointments"){
+        get("/pets/{petId}/appointments"){
+            val petId = try {
+                call.parameters["petId"]?.toInt() ?: throw IllegalStateException("Missing parameter: petId")
+            } catch (e: Exception) {
+                call.respond(HttpStatusCode.BadRequest, "Invalid petId: must be an integer value")
+                return@get
+            }
 
+            call.respond(transaction {
+                PetAppointmentRegistrations.selectAll()
+                    .andWhere { PetAppointmentRegistrations.petId eq petId }
+                    .map { RegistrationDto(
+                        it[PetAppointmentRegistrations.id].value,
+                        it[PetAppointmentRegistrations.petId].value,
+                        it[PetAppointmentRegistrations.appointmentId].value,
+                        it[PetAppointmentRegistrations.date]
+                    ) }
+            })
         }
     }
 }
