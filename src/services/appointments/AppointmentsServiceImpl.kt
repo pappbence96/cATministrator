@@ -77,8 +77,7 @@ class AppointmentsServiceImpl : AppointmentsService {
     override fun listRegistrationsOfOwner(ownerId: Int): List<RegistrationDto> {
         return transaction {
             PetOwners.selectAll()
-                .andWhere { Pets.id eq ownerId }
-                .map{ it[Pets.id]}
+                .andWhere { PetOwners.id eq ownerId }
                 .firstOrNull() ?: throw NotFoundException("No owner found with id: $ownerId")
 
             val petIdsOfOwner = Pets.selectAll()
