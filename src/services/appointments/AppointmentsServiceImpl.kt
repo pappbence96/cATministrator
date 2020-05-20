@@ -6,15 +6,9 @@ import hu.pappbence.model.PetAppointmentRegistrations
 import hu.pappbence.model.PetOwners
 import hu.pappbence.model.Pets
 import io.ktor.features.NotFoundException
-import org.jetbrains.exposed.sql.ResultRow
-import org.jetbrains.exposed.sql.SqlExpressionBuilder.eq
-import org.jetbrains.exposed.sql.andWhere
-import org.jetbrains.exposed.sql.insert
-import org.jetbrains.exposed.sql.selectAll
+import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.joda.time.DateTime
-import java.lang.Exception
-import java.util.*
 
 class AppointmentsServiceImpl : AppointmentsService {
     override fun listAppointments(): List<AppointmentDto> {
@@ -65,7 +59,6 @@ class AppointmentsServiceImpl : AppointmentsService {
         return transaction {
             Pets.selectAll()
                 .andWhere { Pets.id eq petId }
-                .map{ it[Pets.id]}
                 .firstOrNull() ?: throw NotFoundException("No pet found with id: $petId")
 
             PetAppointmentRegistrations.selectAll()
@@ -80,12 +73,8 @@ class AppointmentsServiceImpl : AppointmentsService {
                 .andWhere { PetOwners.id eq ownerId }
                 .firstOrNull() ?: throw NotFoundException("No owner found with id: $ownerId")
 
-            val petIdsOfOwner = Pets.selectAll()
-                .andWhere { Pets.ownerId eq ownerId }
-                .map { it[Pets.id].value }
-
-            PetAppointmentRegistrations.selectAll()
-                .andWhere { PetAppointmentRegistrations.petId inList petIdsOfOwner }
+            (Pets innerJoin PetAppointmentRegistrations)
+                .select { Pets.ownerId eq ownerId }
                 .map { it.toAppointmentRegistrationDto() }
         }
     }
