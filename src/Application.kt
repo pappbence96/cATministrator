@@ -49,6 +49,9 @@ fun Application.module(testing: Boolean = false) {
             exception<NotFoundException> { cause ->
                 call.respond(HttpStatusCode.NotFound, cause.message ?: "")
             }
+            exception<IllegalArgumentException> { cause ->
+                call.respond(HttpStatusCode.BadRequest, cause.message ?: "")
+            }
         }
     }
 

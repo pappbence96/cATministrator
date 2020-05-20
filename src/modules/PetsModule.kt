@@ -2,6 +2,7 @@ package hu.pappbence.modules
 
 import hu.pappbence.dto.PetDto
 import hu.pappbence.dto.ResourceCreatedDto
+import hu.pappbence.extensions.getUrlParam
 import hu.pappbence.services.pets.PetsService
 import io.ktor.application.Application
 import io.ktor.application.call
@@ -23,51 +24,28 @@ fun Application.petsModule() {
             call.respond(petsService.listPets())
         }
 
-        get("/pets/{id}"){
-            val id = try {
-                call.parameters["id"]?.toInt() ?: throw IllegalStateException("Missing parameter: id")
-            } catch (e: Exception) {
-                call.respond(HttpStatusCode.BadRequest, "Invalid id: must be an integer value")
-                return@get
-            }
-            try {
-                call.respond(petsService.findPetById(id))
-            } catch(e : NoSuchElementException){
-                call.respond(HttpStatusCode.NotFound)
-            }
+        get("/pets/{petId}"){
+            val id = call.getUrlParam("petId")
+
+            call.respond(petsService.findPetById(id))
         }
 
-        put("/pets/{id}"){
-            val id = try {
-                call.parameters["id"]?.toInt() ?: throw IllegalStateException("Missing parameter: id")
-            } catch (e: Exception) {
-                call.respond(HttpStatusCode.BadRequest, "Invalid id: must be an integer value")
-                return@put
-            }
+        put("/pets/{petId}"){
+            val id = call.getUrlParam("petId")
             val dto = call.receive<PetDto>()
 
             petsService.updatePet(id, dto)
             call.respond(HttpStatusCode.NoContent)
         }
 
-        get("/owners/{id}/pets"){
-            val id = try {
-                call.parameters["id"]?.toInt() ?: throw IllegalStateException("Missing parameter: id")
-            } catch (e: Exception) {
-                call.respond(HttpStatusCode.BadRequest, "Invalid id: must be an integer value")
-                return@get
-            }
+        get("/owners/{ownerId}/pets"){
+            val id = call.getUrlParam("ownerId")
 
             call.respond(petsService.listPetsOfOwner(id))
         }
 
-        post("/owners/{id}/pets"){
-            val id = try {
-                call.parameters["id"]?.toInt() ?: throw IllegalStateException("Missing parameter: id")
-            } catch (e: Exception) {
-                call.respond(HttpStatusCode.BadRequest, "Invalid id: must be an integer value")
-                return@post
-            }
+        post("/owners/{ownerId}/pets"){
+            val id = call.getUrlParam("ownerId")
             val dto = call.receive<PetDto>()
 
             call.respond(ResourceCreatedDto(petsService.createPetForUser(id, dto)))

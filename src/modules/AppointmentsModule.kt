@@ -1,6 +1,7 @@
 package hu.pappbence.modules
 
 import hu.pappbence.dto.*
+import hu.pappbence.extensions.getUrlParam
 import hu.pappbence.model.AppointmentTypes
 import hu.pappbence.model.PetAppointmentRegistrations
 import hu.pappbence.model.PetOwners
@@ -31,18 +32,10 @@ fun Application.appointmentsModule() {
             call.respond(appointmentsService.listAppointments())
         }
 
-        get("/appointments/{id}") {
-            val id = try {
-                call.parameters["id"]?.toInt() ?: throw IllegalStateException("Missing parameter: id")
-            } catch (e: Exception) {
-                call.respond(HttpStatusCode.BadRequest, "Invalid id: must be an integer value")
-                return@get
-            }
-            try {
-                call.respond(appointmentsService.findAppointmentById(id))
-            } catch(e: Exception) {
-                call.respond(HttpStatusCode.NotFound)
-            }
+        get("/appointments/{appointmentId}") {
+            val id = call.getUrlParam("appointmentId")
+
+            call.respond(appointmentsService.findAppointmentById(id))
         }
 
         get("/appointments/registrations") {
@@ -50,41 +43,21 @@ fun Application.appointmentsModule() {
         }
 
         post("/pets/{petId}/registrations/{appointmentId}"){
-            val petId = try {
-                call.parameters["petId"]?.toInt() ?: throw IllegalStateException("Missing parameter: petId")
-            } catch (e: Exception) {
-                call.respond(HttpStatusCode.BadRequest, "Invalid petId: must be an integer value")
-                return@post
-            }
-            val appointmentId = try {
-                call.parameters["appointmentId"]?.toInt() ?: throw IllegalStateException("Missing parameter: appointmentId")
-            } catch (e: Exception) {
-                call.respond(HttpStatusCode.BadRequest, "Invalid appointmentId: must be an integer value")
-                return@post
-            }
+            val petId = call.getUrlParam("petId")
+            val appointmentId = call.getUrlParam("appointmentId")
             val dto = call.receive<AppointmentRegistrationDto>()
 
             call.respond(appointmentsService.registerPetForAppointment(petId, appointmentId, dto.date))
         }
 
         get("/owners/{ownerId}/registrations"){
-            val ownerId = try {
-                call.parameters["ownerId"]?.toInt() ?: throw IllegalStateException("Missing parameter: ownerId")
-            } catch (e: Exception) {
-                call.respond(HttpStatusCode.BadRequest, "Invalid ownerId: must be an integer value")
-                return@get
-            }
+            val ownerId = call.getUrlParam("ownerId")
 
             call.respond(appointmentsService.listRegistrationsOfOwner(ownerId))
         }
 
         get("/pets/{petId}/registrations"){
-            val petId = try {
-                call.parameters["petId"]?.toInt() ?: throw IllegalStateException("Missing parameter: petId")
-            } catch (e: Exception) {
-                call.respond(HttpStatusCode.BadRequest, "Invalid petId: must be an integer value")
-                return@get
-            }
+            val petId = call.getUrlParam("petId")
 
             call.respond(appointmentsService.listRegistrationsOfPet(petId))
         }

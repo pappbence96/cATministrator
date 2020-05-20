@@ -2,6 +2,7 @@ package hu.pappbence.modules
 
 import hu.pappbence.dto.PetOwnerDto
 import hu.pappbence.dto.ResourceCreatedDto
+import hu.pappbence.extensions.getUrlParam
 import hu.pappbence.services.owners.OwnersService
 import io.ktor.application.Application
 import io.ktor.application.call
@@ -23,13 +24,8 @@ fun Application.ownersModule() {
             call.respond(ownersService.listAll())
         }
 
-        get("/owners/{id}") {
-            val id = try {
-                call.parameters["id"]?.toInt() ?: throw IllegalStateException("Missing parameter: id")
-            } catch (e: Exception) {
-                call.respond(HttpStatusCode.BadRequest, "Invalid id: must be an integer value")
-                return@get
-            }
+        get("/owners/{ownerId}") {
+            val id = call.getUrlParam("ownerId")
 
             call.respond(ownersService.findById(id))
         }
@@ -37,16 +33,12 @@ fun Application.ownersModule() {
         post("/owners") {
             val dto = call.receive<PetOwnerDto>()
             val id = ownersService.create(dto)
+
             call.respond(ResourceCreatedDto(id))
         }
 
-        put("/owners/{id}") {
-            val id = try {
-                call.parameters["id"]?.toInt() ?: throw IllegalStateException("Missing parameter: id")
-            } catch (e: Exception) {
-                call.respond(HttpStatusCode.BadRequest, "Invalid id: must be an integer value")
-                return@put
-            }
+        put("/owners/{ownerId}") {
+            val id = call.getUrlParam("ownerId")
             val dto = call.receive<PetOwnerDto>()
 
             ownersService.update(id, dto)
