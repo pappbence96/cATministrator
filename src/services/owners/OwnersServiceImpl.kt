@@ -5,6 +5,7 @@ import hu.pappbence.model.PetOwners
 import io.ktor.features.NotFoundException
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
+import org.joda.time.DateTime
 
 /*
     Service handling pet owner related tasks
@@ -32,18 +33,22 @@ class OwnersServiceImpl : OwnersService {
                 it[name] = dto.name
                 it[phone] = dto.phone
                 it[balance] = dto.balance
+                it[registration] = DateTime.now()
             } get PetOwners.id
         }
         return id.value
     }
 
     // Update an existing pet owner specified by their ID
-    override fun update(id: Int, dto: PetOwnerDto) : Int {
-        return transaction {
-            PetOwners.update ({ PetOwners.id eq id }) {
+    override fun update(id: Int, dto: PetOwnerDto){
+        transaction {
+            val result = PetOwners.update ({ PetOwners.id eq id }) {
                 it[name] = dto.name
                 it[phone] = dto.phone
                 it[balance] = dto.balance
+            }
+            if(result == 0) {
+                throw NotFoundException("No owner found with id: $id")
             }
         }
     }

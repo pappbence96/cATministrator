@@ -56,12 +56,15 @@ class PetsServiceImpl : PetsService {
         return petId.value
     }
 
-    override fun updatePet(id: Int, dto: PetDto): Int {
-        return transaction {
-            Pets.update({ Pets.id eq id }) {
+    override fun updatePet(id: Int, dto: PetDto) {
+        transaction {
+            val result = Pets.update({ Pets.id eq id }) {
                 it[name] = dto.name
                 it[age] = dto.age
                 it[species] = dto.species
+            }
+            if(result == 0) {
+                throw NotFoundException("No pet found with id: $id")
             }
         }
     }
