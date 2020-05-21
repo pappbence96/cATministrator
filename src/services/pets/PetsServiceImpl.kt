@@ -38,6 +38,8 @@ class PetsServiceImpl : PetsService {
     }
 
     override fun createPetForUser(ownerId: Int, dto: PetDto) : Int{
+        validateDtoAndThrow(dto)
+
         val petId = transaction {
             val ownerIdObj = PetOwners.selectAll()
                 .andWhere { PetOwners.id eq ownerId }
@@ -57,6 +59,8 @@ class PetsServiceImpl : PetsService {
     }
 
     override fun updatePet(id: Int, dto: PetDto) {
+        validateDtoAndThrow(dto)
+
         transaction {
             val result = Pets.update({ Pets.id eq id }) {
                 it[name] = dto.name
@@ -78,4 +82,16 @@ class PetsServiceImpl : PetsService {
         this[Pets.added],
         this[Pets.ownerId].value
     )
+
+    private fun validateDtoAndThrow(dto: PetDto) {
+        if(dto.name.isBlank()) {
+            throw IllegalArgumentException("Name must not be blank")
+        }
+        if(dto.species.isBlank()) {
+            throw IllegalArgumentException("Species must not be blank")
+        }
+        if(dto.age < 0) {
+            throw java.lang.IllegalArgumentException("Age must be a non-negative integer")
+        }
+    }
 }

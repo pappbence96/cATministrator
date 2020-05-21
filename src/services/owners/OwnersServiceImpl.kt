@@ -30,9 +30,7 @@ class OwnersServiceImpl : OwnersService {
 
     // Register a new pet owner
     override fun create(dto: PetOwnerDto): Int {
-        if(dto.balance < 0){
-            throw IllegalArgumentException("Balance must be a non-negative integer")
-        }
+        validateDtoAndThrow(dto)
 
         val id = transaction {
             PetOwners.insert {
@@ -47,6 +45,8 @@ class OwnersServiceImpl : OwnersService {
 
     // Update an existing pet owner specified by their ID
     override fun update(id: Int, dto: PetOwnerDto){
+        validateDtoAndThrow(dto)
+
         transaction {
             val result = PetOwners.update ({ PetOwners.id eq id }) {
                 it[name] = dto.name
@@ -67,4 +67,16 @@ class OwnersServiceImpl : OwnersService {
         this[PetOwners.balance],
         this[PetOwners.registration]
     )
+
+    private fun validateDtoAndThrow(dto: PetOwnerDto){
+        if(dto.name.isBlank()) {
+            throw IllegalArgumentException("Name must not be blank")
+        }
+        if(dto.phone.isBlank()) {
+            throw IllegalArgumentException("Phone number must not be blank")
+        }
+        if(dto.balance < 0) {
+            throw java.lang.IllegalArgumentException("Balance must be a non-negative integer")
+        }
+    }
 }
