@@ -1,4 +1,4 @@
-#cATministrator API
+# cATministrator API
 
 This project is a simple API that is used to manage the everyday operation of an imaginary animal beauty salon. It is only for internal 
 use so no authentication is in place. The endpoints are only accessed by the employees of the salon. 
@@ -23,7 +23,7 @@ Used technology:
 * [Exposed](https://github.com/JetBrains/Exposed) ORM
 * [Koin](https://insert-koin.io/) dependency injection framework
 
-#Remarks
+# Remarks
 * The endpoint descriptions are declared in their respective module files under the `modules` folder. These are registered
 in the `application.conf` descriptor. Separating the whole API interface into smaller modules helps keeping the endpoints
 more manageable.
@@ -33,10 +33,10 @@ into the modules via DI, thus enforcing proper separation of the application lay
 feature. `KeyNotFound` exceptions get translated into an **404 - Not found** response, while `IllegalArgumentException` 
 exceptions are returned as a **400 - Bad request** status code. 
 
-#API documentation
+# API documentation
 The API features the following endpoints:
 
-###_Owners_ endpoint
+### _Owners_ endpoint
 | Method | Url | Description | Body | Response |
 | --- | --- | --- | --- | --- | 
 | GET | `/owners` | List pet owners | - | List of pet owners |
@@ -45,7 +45,7 @@ The API features the following endpoints:
 | PUT | `/owners/{ownerId}` | Update an existing pet owner | Pet owner | - |
 | POST | `/owners/{ownerId}/pets` | Record a new pet for an existing owner | Pet | ID |
 | GET | `/owners/{ownerId}/registrations` | List registrations of a specific owner | - | List of registrations |
-###_Pets_ endpoint
+### _Pets_ endpoint
 | Method | Url | Description | Body | Response | 
 | --- | --- | --- | --- | --- | 
 | GET | `/pets` | List pets | - | List of pets | 
@@ -53,14 +53,14 @@ The API features the following endpoints:
 | PUT | `/pets/{petId}` | Update an existing pet | Pet | - | 
 | GET | `/pets/{petId}/registrations` | List registrations of a specific pet | List of registrations | - | 
 | POST | `/pets/{petId}/registrations/{appointmentId}` | Register pet for an appointment | Date of the appointment | - | 
-###_Appointments_ endpoint
+### _Appointments_ endpoint
 | Method | Url | Description | Response | 
 | --- | --- | --- | ---  | 
 | GET | `/appointments` | List pets | List of appointments |
 | GET | `/appointments/{appointmentId}` | Get a specific appointment | Appointment |
 | GET | `/appointments/registrations` | List all registrations | Registrations |
 
-#Data model
+# Data model
 **AppointmentTypes**
 ```sqlite
 CREATE TABLE "AppointmentTypes" (
