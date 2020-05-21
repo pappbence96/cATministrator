@@ -6,6 +6,6 @@ import org.jetbrains.exposed.sql.jodatime.datetime
 object PetOwners : IntIdTable() {
     val name = varchar("name", 50)
     val phone = varchar("phoneNumber", 20)
-    val balance = integer("balance")
+    val balance = integer("balance").check { it greaterEq 0 }
     val registration = datetime("registration")
 }

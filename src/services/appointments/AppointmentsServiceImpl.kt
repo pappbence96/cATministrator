@@ -35,21 +35,34 @@ class AppointmentsServiceImpl : AppointmentsService {
 
     override fun registerPetForAppointment(petId: Int, appointmentId: Int, date: DateTime): ResourceCreatedDto {
         val registrationId = transaction {
-            val petIdObj = Pets.selectAll()
+            val pet = Pets.selectAll()
                 .andWhere { Pets.id eq petId }
-                .map{ it[Pets.id]}
                 .firstOrNull() ?: throw NotFoundException("No pet found with id: $petId")
 
-            val appointmentIdObj = AppointmentTypes.selectAll()
+            val owner = PetOwners.selectAll()
+                .andWhere { PetOwners.id eq pet[Pets.ownerId] }
+                .first() // Should not be null as that's a DB constraint violation
+
+            val appointment = AppointmentTypes.selectAll()
                 .andWhere { AppointmentTypes.id eq appointmentId }
-                .map{ it[AppointmentTypes.id]}
                 .firstOrNull() ?: throw NotFoundException("No appointment type found with id: $appointmentId")
 
-            PetAppointmentRegistrations.insert {
-                it[PetAppointmentRegistrations.petId] = petIdObj
-                it[PetAppointmentRegistrations.appointmentId] = appointmentIdObj
+            val ownerBalance = owner[PetOwners.balance]
+            val appointmentFee = appointment[AppointmentTypes.fee]
+            if(ownerBalance < appointmentFee){
+                throw IllegalArgumentException("The owner of the specified pet has insufficient funds (has $ownerBalance, required: $appointmentFee)")
+            }
+
+            val registrationId = PetAppointmentRegistrations.insert {
+                it[PetAppointmentRegistrations.petId] = pet[Pets.id]
+                it[PetAppointmentRegistrations.appointmentId] = appointment[AppointmentTypes.id]
                 it[PetAppointmentRegistrations.date] = date
             } get PetAppointmentRegistrations.id
+            PetOwners.update ({ PetOwners.id eq pet[Pets.ownerId] }) {
+                it[balance] = ownerBalance - appointmentFee
+            }
+
+            registrationId
         }.value
 
         return ResourceCreatedDto(registrationId)

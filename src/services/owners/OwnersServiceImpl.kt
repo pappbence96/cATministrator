@@ -3,9 +3,11 @@ package hu.pappbence.services.owners
 import hu.pappbence.dto.PetOwnerDto
 import hu.pappbence.model.PetOwners
 import io.ktor.features.NotFoundException
+import org.jetbrains.exposed.exceptions.ExposedSQLException
 import org.jetbrains.exposed.sql.*
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.joda.time.DateTime
+import org.sqlite.SQLiteException
 
 /*
     Service handling pet owner related tasks
@@ -28,6 +30,10 @@ class OwnersServiceImpl : OwnersService {
 
     // Register a new pet owner
     override fun create(dto: PetOwnerDto): Int {
+        if(dto.balance < 0){
+            throw IllegalArgumentException("Balance must be a non-negative integer")
+        }
+
         val id = transaction {
             PetOwners.insert {
                 it[name] = dto.name
