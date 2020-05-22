@@ -25,6 +25,7 @@ import org.jetbrains.exposed.sql.transactions.TransactionManager
 import org.jetbrains.exposed.sql.transactions.transaction
 import org.joda.time.DateTime
 import org.koin.core.context.startKoin
+import java.io.File
 import java.sql.Connection
 
 fun main(args: Array<String>): Unit = io.ktor.server.netty.EngineMain.main(args)
@@ -55,6 +56,7 @@ fun Application.module(testing: Boolean = false) {
         }
     }
 
+    File("data").mkdirs()
     Database.connect("jdbc:sqlite:data/data.db", "org.sqlite.JDBC")
     TransactionManager.manager.defaultIsolationLevel = Connection.TRANSACTION_SERIALIZABLE
     transaction {
