@@ -2,17 +2,14 @@ package hu.pappbence
 
 import hu.pappbence.adapters.JsonJodaTimeAdapter
 import hu.pappbence.di.injectionModule
+import hu.pappbence.dummy.initDbDummyData
 import hu.pappbence.model.AppointmentTypes
 import hu.pappbence.model.PetAppointmentRegistrations
 import hu.pappbence.model.PetOwners
 import hu.pappbence.model.Pets
 import io.ktor.application.*
 import io.ktor.response.*
-import io.ktor.routing.*
 import io.ktor.http.*
-import io.ktor.html.*
-import kotlinx.html.*
-import kotlinx.css.*
 import io.ktor.client.*
 import io.ktor.client.engine.apache.*
 import io.ktor.client.features.logging.*
@@ -62,6 +59,7 @@ fun Application.module(testing: Boolean = false) {
     transaction {
         addLogger(StdOutSqlLogger)
         SchemaUtils.create(PetOwners, Pets, AppointmentTypes, PetAppointmentRegistrations)
+        initDbDummyData()
     }
 
     startKoin {
