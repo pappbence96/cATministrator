@@ -3,7 +3,7 @@
 This project is a simple API that is used to manage the everyday operation of an imaginary animal beauty salon. It is only for internal 
 use so no authentication is in place. The endpoints are only accessed by the employees of the salon. 
 
-Features:
+### Features:
 * Register pet owners:
     * Record and update customer information
     * Manage the balance of each client
@@ -16,7 +16,7 @@ Features:
     * Deduct the cost of the appointment from the balance of the owner. If the balance would fall below 0, the registration
     process fails
 
-Used technology:
+### Used technology:
 * [Kotlin](https://kotlinlang.org/) programming language
 * [Ktor](https://ktor.io/) API framework
 * [SQLite](https://www.sqlite.org/index.html) database engine
